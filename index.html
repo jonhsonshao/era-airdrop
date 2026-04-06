@@ -42,7 +42,7 @@ document.getElementById("claim").onclick = async () => {
     tip.innerText = "发送交易...";
     const tx = await contract.claimAirdrop({
       value: FEE,
-      gasLimit: 200000
+      gasLimit: 300000  // 关键修改：从200000提高到300000
     });
 
     await tx.wait();
