@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERA 空投领取</title>
+<script src="https://cdn.ethers.org/lib/ethers-6.7.1.umd.min.js"></script>
+<style>
+body{max-width:400px;margin:30px auto;padding:0 20px;font-family:Arial;background:#f5f7fa}
+.card{background:white;padding:25px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+h1{font-size:22px;margin-bottom:8px}
+.desc{color:#666;font-size:14px;margin-bottom:24px}
+button{width:100%;padding:16px;border-radius:12px;background:#007bff;color:white;border:none;font-size:16px;font-weight:bold}
+button:disabled{background:#ccc}
+#msg{margin-top:16px;font-size:14px;color:#333}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>NewEra (ERA) 空投</h1>
+<p class="desc">每24小时1次，最多100次，每次1枚</p>
+<button id="claim">领取空投</button>
+<div id="msg"></div>
+</div>
+
+<script>
+// 👉 把这里换成你的 空投合约地址
+const AIRDROP_CONTRACT = "0x701Cd4cBe9f832dc7746DE2ffA9c225f7AD9A915";
+
+const ABI = ["function claimAirdrop() external payable"];
+const FEE = ethers.parseEther("0.0005");
+
+document.getElementById("claim").onclick = async ()=>{
+  let btn = document.getElementById("claim");
+  let msg = document.getElementById("msg");
+  btn.disabled = true;
+  btn.innerText = "处理中...";
+  
+  try{
+    let p = new ethers.BrowserProvider(window.ethereum);
+    await p.send("eth_requestAccounts",[]);
+    let s = await p.getSigner();
+    let c = new ethers.Contract(AIRDROP_CONTRACT,ABI,s);
+    
+    let tx = await c.claimAirdrop({value:FEE, gasLimit:120000});
+    msg.innerText = "交易已发送："+tx.hash.slice(0,18)+"...";
+    await tx.wait();
+    msg.innerText = "✅ 领取成功！";
+  }catch(e){
+    msg.innerText = "❌ 失败："+e.message.slice(0,50);
+  }
+  
+  btn.disabled = false;
+  btn.innerText = "领取空投";
+};
+</script>
+</body>
+</html>
